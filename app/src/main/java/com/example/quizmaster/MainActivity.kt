@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.quizmaster.databinding.ActivityMainBinding
+import com.google.firebase.database.FirebaseDatabase
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding;
@@ -27,14 +28,19 @@ class MainActivity : AppCompatActivity() {
 
     private fun getDataFromFirebase(){
 
-        val listQuestionModel = mutableListOf<QuestionModel>()
-        listQuestionModel.add(QuestionModel("What is android?", mutableListOf("Language", "OS", "Product", "None"),"OS"))
-        listQuestionModel.add(QuestionModel("What owns android?", mutableListOf("Me", "Rayhan bhai", "Shahriar bhai", "None"),"Me"))
-        listQuestionModel.add(QuestionModel("What assistant android?", mutableListOf("Language", "OS", "Product", "None"),"OS"))
+        FirebaseDatabase.getInstance().reference
+            .get()
+            .addOnSuccessListener { dataSnapshot->
+                if(dataSnapshot.exists()){
+                    for(snapshot in dataSnapshot.children){
+                        val quizModel = snapshot.getValue(QuizModel::class.java)
+                        if (quizModel != null) {
+                            quiModelList.add(quizModel)
+                        }
+                    }
+                }
+                    setupRecyclerView()
+            }
 
-        quiModelList.add(QuizModel("1","Programming","All the basic progarmming","10",listQuestionModel))
-       // quiModelList.add(QuizModel("2","Computer","All the basic computer question","20"))
-       // quiModelList.add(QuizModel("3","Programming","All the ger question","15"))
-        setupRecyclerView()
     }
 }
