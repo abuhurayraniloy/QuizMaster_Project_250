@@ -6,6 +6,7 @@ import android.os.CountDownTimer
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
@@ -91,6 +92,10 @@ class QuizActivity : AppCompatActivity(),View.OnClickListener {
         val clickBtn = view as Button
         if(clickBtn.id==R.id.next_btn){
             //Next Button is Clicked
+            if(selectedAnswer.isEmpty()){
+                Toast.makeText(applicationContext,"Please select answer to continue", Toast.LENGTH_SHORT).show()
+                return
+            }
             if(selectedAnswer == questionModelList[currentQuestionIndex].correct){
                 score++
                 Log.i("Score of quiz",score.toString())
