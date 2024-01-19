@@ -1,9 +1,12 @@
 package com.example.quizmaster
 
+import android.graphics.Color
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.Log
 import android.view.View
 import android.widget.Button
+import androidx.appcompat.app.AlertDialog
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -11,6 +14,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.quizmaster.databinding.ActivityQuizBinding
+import com.example.quizmaster.databinding.ScoreDialogBinding
 
 class QuizActivity : AppCompatActivity(),View.OnClickListener {
 
@@ -22,6 +26,8 @@ class QuizActivity : AppCompatActivity(),View.OnClickListener {
     lateinit var binding: ActivityQuizBinding
 
     var currentQuestionIndex = 0;
+    var selectedAnswer = ""
+    var score = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityQuizBinding.inflate(layoutInflater)
@@ -55,6 +61,12 @@ class QuizActivity : AppCompatActivity(),View.OnClickListener {
         }.start()
     }
     private fun loadQuestions(){
+        selectedAnswer = ""
+        if(currentQuestionIndex == questionModelList.size){
+            finishQuiz()
+            return
+        }
+
         binding.apply {
             questionIndicatorTextview.text = "Question ${currentQuestionIndex+1}/${questionModelList.size} "
             questionProgressIndicator.progress =
@@ -69,14 +81,54 @@ class QuizActivity : AppCompatActivity(),View.OnClickListener {
 
     override fun onClick(view: View?) {
 
+        binding.apply {
+            btn0.setBackgroundColor(getColor(R.color.gray))
+            btn1.setBackgroundColor(getColor(R.color.gray))
+            btn2.setBackgroundColor(getColor(R.color.gray))
+            btn3.setBackgroundColor(getColor(R.color.gray))
+        }
+
         val clickBtn = view as Button
         if(clickBtn.id==R.id.next_btn){
             //Next Button is Clicked
+            if(selectedAnswer == questionModelList[currentQuestionIndex].correct){
+                score++
+                Log.i("Score of quiz",score.toString())
+            }
             currentQuestionIndex++
             loadQuestions()
         }else{
             //Options button is clicked
+            selectedAnswer = clickBtn.text.toString()
             clickBtn.setBackgroundColor(getColor(R.color.orange))
         }
+    }
+
+    private fun finishQuiz(){
+        val totalQuestions = questionModelList.size
+        val percentage = ((score.toFloat() / totalQuestions.toFloat()) * 100).toInt()
+
+        val dialogBinding = ScoreDialogBinding.inflate(layoutInflater)
+        dialogBinding.apply {
+            scoreProgressIndicator.progress = percentage
+            scoreProgressText.text = "$percentage %"
+            if(percentage>60){
+                scoreTitle.text = "Congrats! You have passed"
+                scoreTitle.setTextColor(Color.BLUE)
+            }else{
+                scoreTitle.text = "Oops! You have failed"
+                scoreTitle.setTextColor(Color.RED)
+            }
+            scoreSubtitle.text = "$score out of $totalQuestions are correct"
+            finishBtn.setOnClickListener{
+                finish()
+            }
+        }
+
+        AlertDialog.Builder(this)
+            .setView(dialogBinding.root)
+            .setCancelable(false)
+            .show()
+
     }
 }
