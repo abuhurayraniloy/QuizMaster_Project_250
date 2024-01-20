@@ -53,6 +53,10 @@ class QuizActivity : AppCompatActivity(),View.OnClickListener {
                 val minutes = seconds/60
                 val remainingSeconds = seconds%60
                 binding.timerIndicatorTextview.text = String.format("%02d:%02d", minutes, remainingSeconds)
+                if(minutes.toInt() == 0 && remainingSeconds.toInt() == 0){
+                    finishQuiz()
+                    return
+                }
             }
 
             override fun onFinish() {
